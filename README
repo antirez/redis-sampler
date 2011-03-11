@@ -1,0 +1,15 @@
+Redis Sampler README
+====================
+
+Redis sampler is an utility to check the composition of your Redis dataset.
+
+Using it is as simple as typing:
+
+    ./redis-sampler.rb <host> <port> <db> <samplesize>
+
+The host and port argument are the ones of your Redis instance.
+The DB is the database to test. By default Redis uses database 0 unless you
+are writing against a different DB.
+
+The sample size is the number of elements to check using RANDOMKEY.
+For large datasets a sample size of 100000 or more is recommended.

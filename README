@@ -7,7 +7,7 @@ Using it is as simple as typing:
 
     ./redis-sampler.rb <host> <port> <db> <samplesize>
 
-The host and port argument are the ones of your Redis instance.
+The host and port arguments are the ones of your Redis instance.
 The DB is the database to test. By default Redis uses database 0 unless you
 are writing against a different DB.
 

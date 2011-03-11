@@ -106,7 +106,7 @@ class RedisSampler
         }
         puts "" if i % 3 != 0
         if i != h.length
-            puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc tot-partial tot})"
+            puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc tot-partial,tot})"
         end
     end
 

@@ -94,7 +94,9 @@ class RedisSampler
         i = 0
         tot = 0
         h.each{|k,v| tot += v}
+        partial = 0
         h.each{|k,v|
+            partial += v
             s = " #{k}: #{v} (#{perc v,tot})"
             s += " " * (25 - s.length) if s.length < 25
             print s
@@ -104,7 +106,7 @@ class RedisSampler
         }
         puts "" if i % 3 != 0
         if i != h.length
-            puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc @samplesize-tot})"
+            puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc tot-partial tot})"
         end
     end
 

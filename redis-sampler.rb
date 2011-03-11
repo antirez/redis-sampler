@@ -34,21 +34,20 @@ class RedisSampler
     def initialize(r,samplesize)
         @redis = r
         @samplesize = samplesize
-        @types = {}
-        @zset_card = {}
-        @zset_elesize = {}
-        @list_len = {}
-        @list_elesize = {}
-        @hash_len = {}
-        @hash_fsize = {}
-        @hash_vsize = {}
-        @set_card = {}
-        @set_elesize = {}
-        @string_elesize = {}
+        @types = Hash.new{|h,k| h[k] = 0 }
+        @zset_card = Hash.new{|h,k| h[k] = 0 }
+        @zset_elesize = Hash.new{|h,k| h[k] = 0 }
+        @list_len = Hash.new{|h,k| h[k] = 0 }
+        @list_elesize = Hash.new{|h,k| h[k] = 0 }
+        @hash_len = Hash.new{|h,k| h[k] = 0 }
+        @hash_fsize = Hash.new{|h,k| h[k] = 0 }
+        @hash_vsize = Hash.new{|h,k| h[k] = 0 }
+        @set_card = Hash.new{|h,k| h[k] = 0 }
+        @set_elesize = Hash.new{|h,k| h[k] = 0 }
+        @string_elesize = Hash.new{|h,k| h[k] = 0 }
     end
 
     def incr_freq_table(hash,item)
-        hash[item] = 0 if !hash[item]
         hash[item] += 1
     end
 

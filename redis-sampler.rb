@@ -112,12 +112,15 @@ class RedisSampler
 
     def compute_avg(hash)
         # Compute average
+        min = max = nil
         avg = 0
         items = 0
         hash.each{|k,v|
             next if k == 'unknown'
             avg += k*v
             items += v
+            min = k if !min or min > k
+            max = k if !max or max < k
         }
         avg /= items.to_f
         # Compute standard deviation
@@ -127,13 +130,14 @@ class RedisSampler
             stddev += ((k-avg)**2)*v
         }
         stddev = Math.sqrt(stddev/items.to_f)
-        return {:avg => avg, :stddev => stddev}
+        return {:avg => avg, :stddev => stddev, :min => min, :max => max}
     end
 
     def render_avg(hash)
         data = compute_avg(hash)
         printf "Average: %.2f Standard Deviation: %.2f",data[:avg],data[:stddev]
         puts ""
+        puts "Min: #{data[:min]} Max: #{data[:max]}"
     end
 
     def stats

@@ -84,8 +84,8 @@ class RedisSampler
         }
     end
 
-    def perc(val)
-        sprintf("%.2f%%",val*100/@samplesize.to_f)
+    def perc(val,tot)
+        sprintf("%.2f%%",val*100/tot.to_f)
     end
 
     def render_freq_table(title,hash)
@@ -93,9 +93,9 @@ class RedisSampler
         h = hash.sort{|a,b| b[1]<=>a[1]}
         i = 0
         tot = 0
+        h.each{|k,v| tot += v}
         h.each{|k,v|
-            tot += v
-            s = " #{k}: #{v} (#{perc v})"
+            s = " #{k}: #{v} (#{perc v,tot})"
             s += " " * (25 - s.length) if s.length < 25
             print s
             i += 1

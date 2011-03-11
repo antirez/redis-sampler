@@ -141,29 +141,29 @@ class RedisSampler
 
     def stats
         render_freq_table("Types",@types)
-        if @string_elesize.length != 0
+        unless @string_elesize.empty?
             render_freq_table("Strings, size of values",@string_elesize)
             render_avg(@string_elesize)
         end
-        if @list_len.length != 0
+        unless @list_len.empty?
             render_freq_table("Lists, number of elements",@list_len)
             render_avg(@list_len)
             render_freq_table("Lists, size of elements",@list_elesize)
             render_avg(@list_elesize)
         end
-        if @set_card.length != 0
+        unless @set_card.empty?
             render_freq_table("Sets, number of elements",@zset_card)
             render_avg(@set_card)
             render_freq_table("Sets, size of elements",@set_elesize)
             render_avg(@set_elesize)
         end
-        if @zset_card.length != 0
+        unless @zset_card.empty?
             render_freq_table("Sorted sets, number of elements",@zset_card)
             render_avg(@zset_card)
             render_freq_table("Sorted sets, size of elements",@zset_elesize)
             render_avg(@zset_elesize)
         end
-        if @hash_len.length != 0
+        unless @hash_len.empty?
             render_freq_table("Hashes, number of fields",@hash_len)
             render_avg(@hash_len)
             render_freq_table("Hashes, size of fields",@hash_fsize)

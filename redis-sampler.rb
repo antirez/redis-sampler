@@ -89,7 +89,7 @@ class RedisSampler
     end
 
     def render_freq_table(title,hash)
-        puts "\n#{title.upcase}\n#{"="*title.length}\n"
+        puts "\n#{title.upcase}\n#{"="*title.length}\n" if title
         h = hash.sort{|a,b| b[1]<=>a[1]}
         i = 0
         tot = 0
@@ -108,6 +108,26 @@ class RedisSampler
         if i != h.length
             puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc tot-partial,tot})"
         end
+    end
+
+    def num_to_pow(n)
+        # Convert the number into the smallest power of two that
+        # is equal or greater of the number.
+        p = 1
+        p *= 2 while n > p
+        p
+    end
+
+    def render_power_table(hash)
+        puts "\nPowers of two distribution: (NOTE <= p means: p/2 < x <= p)"
+        pow = {}
+        hash.each{|k,v|
+            next if k == 'unknown'
+            p = "<= #{num_to_pow(k)}"
+            pow[p] = 0 if !pow[p]
+            pow[p] += v
+        }
+        render_freq_table(nil,pow)
     end
 
     def compute_avg(hash)
@@ -135,9 +155,9 @@ class RedisSampler
 
     def render_avg(hash)
         data = compute_avg(hash)
-        printf "Average: %.2f Standard Deviation: %.2f",data[:avg],data[:stddev]
+        printf " Average: %.2f Standard Deviation: %.2f",data[:avg],data[:stddev]
         puts ""
-        puts "Min: #{data[:min]} Max: #{data[:max]}"
+        puts " Min: #{data[:min]} Max: #{data[:max]}"
     end
 
     def stats
@@ -145,32 +165,42 @@ class RedisSampler
         if @string_elesize.length != 0
             render_freq_table("Strings, size of values",@string_elesize)
             render_avg(@string_elesize)
+            render_power_table(@string_elesize)
         end
         if @list_len.length != 0
             render_freq_table("Lists, number of elements",@list_len)
             render_avg(@list_len)
+            render_power_table(@list_len)
             render_freq_table("Lists, size of elements",@list_elesize)
             render_avg(@list_elesize)
+            render_power_table(@list_elesize)
         end
         if @set_card.length != 0
             render_freq_table("Sets, number of elements",@zset_card)
             render_avg(@set_card)
+            render_power_table(@set_card)
             render_freq_table("Sets, size of elements",@set_elesize)
             render_avg(@set_elesize)
+            render_power_table(@set_elesize)
         end
         if @zset_card.length != 0
             render_freq_table("Sorted sets, number of elements",@zset_card)
             render_avg(@zset_card)
+            render_power_table(@zset_card)
             render_freq_table("Sorted sets, size of elements",@zset_elesize)
             render_avg(@zset_elesize)
+            render_power_table(@zset_elesize)
         end
         if @hash_len.length != 0
             render_freq_table("Hashes, number of fields",@hash_len)
             render_avg(@hash_len)
+            render_power_table(@hash_len)
             render_freq_table("Hashes, size of fields",@hash_fsize)
             render_avg(@hash_fsize)
+            render_power_table(@hash_fsize)
             render_freq_table("Hashes, size of values",@hash_vsize)
             render_avg(@hash_vsize)
+            render_power_table(@hash_vsize)
         end
         puts ""
     end

@@ -100,10 +100,10 @@ class RedisSampler
             s += " " * (25 - s.length) if s.length < 25
             print s
             i += 1
-            puts "" if i % 3 == 0
+            puts if i % 3 == 0
             break if i >= 21 and v/@samplesize.to_f < 0.005
         }
-        puts "" if i % 3 != 0
+        puts if i % 3 != 0
         if i != h.length
             puts "(suppressed #{h.length-i} items with perc < 0.5% for a total of #{perc tot-partial,tot})"
         end
@@ -135,7 +135,7 @@ class RedisSampler
     def render_avg(hash)
         data = compute_avg(hash)
         printf "Average: %.2f Standard Deviation: %.2f",data[:avg],data[:stddev]
-        puts ""
+        puts
         puts "Min: #{data[:min]} Max: #{data[:max]}"
     end
 
@@ -171,7 +171,7 @@ class RedisSampler
             render_freq_table("Hashes, size of values",@hash_vsize)
             render_avg(@hash_vsize)
         end
-        puts ""
+        puts
     end
 end
 

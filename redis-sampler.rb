@@ -60,7 +60,10 @@ class RedisSampler
             case t
             when 'zset'
                 incr_freq_table(@zset_card,@redis.zcard(k))
-                incr_freq_table(@zset_elesize,@redis.zrange(k,0,0)[0].length)
+                item = @redis.zrange(k,0,0)[0]
+                if item != nil
+                    incr_freq_table(@zset_elesize,item.length)
+                end
             when 'set'
                 incr_freq_table(@set_card,@redis.scard(k))
                 incr_freq_table(@set_elesize,@redis.srandmember(k).length)

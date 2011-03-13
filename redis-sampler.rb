@@ -35,6 +35,7 @@ class RedisSampler
         @redis = r
         @samplesize = samplesize
         @types = {}
+        @expires = {}
         @zset_card = {}
         @zset_elesize = {}
         @list_len = {}
@@ -55,28 +56,53 @@ class RedisSampler
     def sample
         @samplesize.times {
             k = @redis.randomkey
-            t = @redis.type(k)
+            p = @redis.pipelined {
+                @redis.type(k)
+                @redis.ttl(k)
+            }
+            t = p[0]
+            x = p[1]
+            x = 'unknown' if x.to_i == -1
             incr_freq_table(@types,t)
+            incr_freq_table(@expires,x)
             case t
             when 'zset'
-                incr_freq_table(@zset_card,@redis.zcard(k))
-                item = @redis.zrange(k,0,0)[0]
-                if item != nil
-                    incr_freq_table(@zset_elesize,item.length)
-                end
+                p = @redis.pipelined {
+                    @redis.zcard(k)
+                    @redis.zrange(k,0,0)
+                }
+                card = p[0]
+                ele = p[1][0]
+                incr_freq_table(@zset_card,card) if card != 0
+                incr_freq_table(@zset_elesize,ele.length) if ele
             when 'set'
-                incr_freq_table(@set_card,@redis.scard(k))
-                incr_freq_table(@set_elesize,@redis.srandmember(k).length)
+                p = @redis.pipelined {
+                    @redis.scard(k)
+                    @redis.srandmember(k)
+                }
+                card = p[0]
+                ele = p[1]
+                incr_freq_table(@set_card,card) if card != 0
+                incr_freq_table(@set_elesize,ele.length) if ele
             when 'list'
-                incr_freq_table(@list_len,@redis.llen(k))
-                incr_freq_table(@list_elesize,@redis.lrange(k,0,0)[0].length)
+                p = @redis.pipelined {
+                    @redis.llen(k)
+                    @redis.lrange(k,0,0)
+                }
+                len = p[0]
+                ele = p[1][0]
+                incr_freq_table(@list_len,len) if len != 0
+                incr_freq_table(@list_elesize,ele.length) if ele
             when 'hash'
                 l = @redis.hlen(k)
-                incr_freq_table(@hash_len,l)
-                if l < 32
+                incr_freq_table(@hash_len,l) if l != 0
+                if l >= 32
                     field = @redis.hkeys(k)[0]
-                    incr_freq_table(@hash_fsize,field.length)
-                    incr_freq_table(@hash_vsize,@redis.hget(k,field).length)
+                    if field
+                        incr_freq_table(@hash_fsize,field.length)
+                        val = @redis.hget(k,field)
+                        incr_freq_table(@hash_vsize,val.length) if val
+                    end
                 else
                     incr_freq_table(@hash_fsize,'unknown')
                     incr_freq_table(@hash_vsize,'unknown')
@@ -145,6 +171,9 @@ class RedisSampler
             min = k if !min or min > k
             max = k if !max or max < k
         }
+        if items.to_i == 0
+            return {:avg => 0, :stddev => 0, :min => 0, :max => 0}
+        end
         avg /= items.to_f
         # Compute standard deviation
         stddev = 0
@@ -165,6 +194,10 @@ class RedisSampler
 
     def stats
         render_freq_table("Types",@types)
+        render_freq_table("Expires",@expires)
+        render_avg(@expires)
+        render_power_table(@expires)
+        puts "\nNote: 'unknown' expire means keys with no expire"
         if @string_elesize.length != 0
             render_freq_table("Strings, size of values",@string_elesize)
             render_avg(@string_elesize)

@@ -171,6 +171,9 @@ class RedisSampler
             min = k if !min or min > k
             max = k if !max or max < k
         }
+        if items.to_i == 0
+            return {:avg => 0, :stddev => 0, :min => 0, :max => 0}
+        end
         avg /= items.to_f
         # Compute standard deviation
         stddev = 0

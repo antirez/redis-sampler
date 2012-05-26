@@ -212,7 +212,7 @@ class RedisSampler
             render_power_table(@list_elesize)
         end
         if @set_card.length != 0
-            render_freq_table("Sets, number of elements",@zset_card)
+            render_freq_table("Sets, number of elements",@set_card)
             render_avg(@set_card)
             render_power_table(@set_card)
             render_freq_table("Sets, size of elements",@set_elesize)

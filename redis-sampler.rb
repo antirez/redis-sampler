@@ -97,10 +97,10 @@ class RedisSampler
                 l = @redis.hlen(k)
                 incr_freq_table(@hash_len,l) if l != 0
                 if l >= 32
-                    field = @redis.hkeys(k)[0]
+                    _, fvs = @redis.hscan(k, 0, :count => 10)
+                    field, val = fvs.first
                     if field
                         incr_freq_table(@hash_fsize,field.length)
-                        val = @redis.hget(k,field)
                         incr_freq_table(@hash_vsize,val.length) if val
                     end
                 else

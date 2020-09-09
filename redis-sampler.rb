@@ -2,10 +2,10 @@
 
 # Copyright (c) 2011, Salvatore Sanfilippo
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
@@ -14,7 +14,7 @@
 #     * Neither the name of Redis nor the names of its contributors may be
 #       used to endorse or promote products derived from this software without
 #       specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 # TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -29,6 +29,7 @@
 
 require 'rubygems'
 require 'redis'
+require 'optparse'
 
 class RedisSampler
     def initialize(r,samplesize)
@@ -242,13 +243,44 @@ class RedisSampler
     end
 end
 
-if ARGV.length != 4
-    puts "Usage: redis-sampler.rb <host> <port> <dbnum> <sample_size>"
-    exit 1
+banner_text = "Usage: redis-sampler.rb <host> <port> <sample_size>"
+
+options = {}
+parser = OptionParser.new do |opts|
+    opts.banner = banner_text
+
+    opts.on("-u", "--user=user", "The user to connect to the DB.") do |v|
+        options[:user] = v
+    end
+    opts.on("-p", "--password=password", "The password to connect to the DB.") do |v|
+        options[:password] = v
+    end
+    opts.on("-db", "--db=dbnum", "The DB is the database to test. Defaults to 0.") do |v|
+        options[:db] = v
+    end
+    opts.on("-h", "--help", "Prints this help") do
+        puts opts
+        exit
+    end
+end.parse!
+
+if ARGV.length != 3
+    puts banner_text
+    exit
 end
 
-redis = Redis.new(:host => ARGV[0], :port => ARGV[1].to_i, :db => ARGV[2].to_i)
-sampler = RedisSampler.new(redis,ARGV[3].to_i)
-puts "Sampling #{ARGV[0]}:#{ARGV[1]} DB:#{ARGV[2]} with #{ARGV[3]} RANDOMKEYS"
+host, port, sample_size = ARGV
+sample_size = sample_size.to_i
+options[:host] = host
+options[:port] = port
+
+db = options.delete(:db)
+if db.nil?
+    db = 0 # redis default
+end
+
+puts "Sampling #{host}:#{port} DB:#{db} with #{sample_size} RANDOMKEYS"
+redis = Redis.new(options)
+sampler = RedisSampler.new(redis, sample_size)
 sampler.sample
 sampler.stats

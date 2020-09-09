@@ -255,7 +255,7 @@ parser = OptionParser.new do |opts|
     opts.on("-p", "--password=password", "The password to connect to the DB.") do |v|
         options[:password] = v
     end
-    opts.on("-db", "--db=dbnum", "The DB is the database to test.\nDefaults to 0.") do |v|
+    opts.on("-db", "--db=dbnum", "The DB is the database to test. Defaults to 0.") do |v|
         options[:db] = v
     end
     opts.on("-h", "--help", "Prints this help") do

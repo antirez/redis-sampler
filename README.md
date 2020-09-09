@@ -26,7 +26,7 @@ LAN, otherwise the execution time will be pretty high.
 
 Example Output
 ==============
-
+```
 Sampling localhost:6379 DB:4 with 1000000 RANDOMKEYS
 
 TYPES
@@ -188,3 +188,4 @@ Powers of two distribution: (NOTE <= p means: p/2 < x <= p)
  <= 512: 298 (51.74%)     <= 16: 151 (26.22%)      <= 4: 113 (19.62%)
  <= 8: 10 (1.74%)         <= 2: 3 (0.52%)          <= 1: 1 (0.17%)
 
+```

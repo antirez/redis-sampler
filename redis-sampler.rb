@@ -56,9 +56,9 @@ class RedisSampler
     def sample
         @samplesize.times {
             k = @redis.randomkey
-            p = @redis.pipelined {
-                @redis.type(k)
-                @redis.ttl(k)
+            p = @redis.pipelined {|pl|
+                pl.type(k)
+                pl.ttl(k)
             }
             t = p[0]
             x = p[1]
@@ -67,27 +67,27 @@ class RedisSampler
             incr_freq_table(@expires,x)
             case t
             when 'zset'
-                p = @redis.pipelined {
-                    @redis.zcard(k)
-                    @redis.zrange(k,0,0)
+                p = @redis.pipelined {|pl|
+                    pl.zcard(k)
+                    pl.zrange(k,0,0)
                 }
                 card = p[0]
                 ele = p[1][0]
                 incr_freq_table(@zset_card,card) if card != 0
                 incr_freq_table(@zset_elesize,ele.length) if ele
             when 'set'
-                p = @redis.pipelined {
-                    @redis.scard(k)
-                    @redis.srandmember(k)
+                p = @redis.pipelined {|pl|
+                    pl.scard(k)
+                    pl.srandmember(k)
                 }
                 card = p[0]
                 ele = p[1]
                 incr_freq_table(@set_card,card) if card != 0
                 incr_freq_table(@set_elesize,ele.length) if ele
             when 'list'
-                p = @redis.pipelined {
-                    @redis.llen(k)
-                    @redis.lrange(k,0,0)
+                p = @redis.pipelined {|pl|
+                    pl.llen(k)
+                    pl.lrange(k,0,0)
                 }
                 len = p[0]
                 ele = p[1][0]
